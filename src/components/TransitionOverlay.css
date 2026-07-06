@@ -1,0 +1,68 @@
+.transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  will-change: clip-path;
+}
+
+/* Fills the layer if you drop a video in */
+.transition-overlay__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.transition-overlay__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* Subtle moving starfield grid so the default transition isn't dead */
+.transition-overlay__grid {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, #fff 50%, transparent 50%),
+    radial-gradient(1px 1px at 70% 60%, #cdd6ff 50%, transparent 50%),
+    radial-gradient(1px 1px at 40% 80%, #fff 50%, transparent 50%),
+    radial-gradient(1px 1px at 85% 25%, #9fb6ff 50%, transparent 50%);
+  background-size: 180px 180px, 240px 240px, 200px 200px, 300px 300px;
+  opacity: 0.5;
+  animation: warp 0.9s linear infinite;
+}
+
+@keyframes warp {
+  to { transform: translate3d(0, 180px, 0); }
+}
+
+.transition-overlay__readout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.transition-overlay__dest {
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.transition-overlay__sub {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+}

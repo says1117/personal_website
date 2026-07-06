@@ -1,0 +1,113 @@
+/* ============================================================
+   Design system — sharp, editorial, cosmic-dark.
+   Deliberately restrained: 1px rules, sharp corners, one accent.
+   ============================================================ */
+
+:root {
+  /* Palette — deep slate-black with the amber-gold "Light" accent */
+  --bg:          #07090e;
+  --bg-elevated: #0d1018;
+  --line:        #1c222e;
+  --line-strong: #2a3340;
+  --text:        #e9edf3;
+  --text-dim:    #828d9e;
+  --text-faint:  #4d5666;
+
+  /* Accent — amber/gold (primary) + cold steel (secondary) */
+  --accent:      #e7b169;   /* gold */
+  --accent-bright: #f6cd86;
+  --accent-dim:  #6f5430;
+  --accent-glow: rgba(231, 177, 105, 0.35);
+  --steel:       #6f9ed6;   /* cold secondary, used sparingly */
+  --steel-dim:   #314a66;
+
+  --danger:      #ff4d57;   /* glitch channel A */
+  --cyan:        #38e1ff;   /* glitch channel B */
+
+  /* Type */
+  --font-display: 'Rajdhani', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Mono',
+    'Roboto Mono', Menlo, monospace;
+
+  /* Rhythm */
+  --maxw: 1180px;
+  --gutter: clamp(20px, 5vw, 64px);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+::selection { background: var(--accent); color: var(--bg); }
+
+/* Focus — visible, sharp, never removed for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Shared utility primitives ---------------------------------- */
+
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+/* The little tracked monospace label used across the site */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.rule {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 0;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

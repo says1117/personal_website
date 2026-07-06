@@ -1,0 +1,572 @@
+/* ============================================================
+   ARK-inspired Experience "ride" — built from licensed assets:
+   · /ark/sky.png, mountains-far, mountains, trees, trees-fg —
+     "parallax mountain pack" by ansimuz (OpenGameArt, CC0)
+   · /ark/dino-run.png (8×340×236), /ark/dino-idle.png (10×340×236)
+     strips built from "Free Dino Sprites" by pzUH (OGA, CC0),
+     silhouetted via CSS so they sit in the dusk scene.
+
+   Scroll progress arrives as --p (0→1) on .ark__scene; each
+   parallax layer translates from it at its own depth speed.
+   ============================================================ */
+
+.ark {
+  --ark-holo: #35e0d0;      /* implant teal */
+  --ark-amber: #f5b05a;
+  --ark-ember: #e8853c;
+  --ark-log: #d78cff;       /* tribe-log purple */
+  --ark-xp: #9fe08a;        /* XP green */
+  --ark-night: #1b1430;
+  width: 100%;
+  background: var(--ark-night);
+}
+
+/* Tall wrapper = the scroll distance of the ride */
+.ark__ride { height: 520vh; }
+
+/* Pinned 100vh stage */
+.ark__scene {
+  --p: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* --- Sky (moon + clouds baked into the art) ------------------- */
+.ark__sky {
+  position: absolute;
+  inset: 0;
+  background: url('/ark/sky.png') center / cover no-repeat;
+  image-rendering: pixelated;
+}
+
+/* --- Meteor shower (pixel style) --------------------------------
+   Each meteor is a 4px block head with a blocky box-shadow trail
+   stepping up-right (opposite the fall direction), moving in
+   quantized steps() hops so it reads as pixel art like the rest
+   of the scene. */
+.ark__meteors span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fff3d2;
+  transform: scale(var(--mscale, 1));
+  /* trail: ember blocks fading toward the tail */
+  box-shadow:
+    5px -4px 0 rgba(255, 214, 160, 0.9),
+    10px -8px 0 rgba(245, 176, 90, 0.75),
+    15px -12px 0 rgba(232, 133, 60, 0.55),
+    20px -16px 0 rgba(232, 133, 60, 0.38),
+    25px -20px 0 rgba(180, 95, 50, 0.25),
+    30px -24px 0 rgba(140, 70, 45, 0.15);
+  opacity: 0;
+  animation: meteor var(--mdur, 9s) steps(26) infinite;
+  animation-delay: var(--mdelay, 0s);
+  pointer-events: none;
+}
+@keyframes meteor {
+  0%   { opacity: 0; translate: 0 0; }
+  3%   { opacity: 1; }
+  17%  { opacity: 1; }
+  22%  { opacity: 0; translate: -44vw 36vh; }
+  100% { opacity: 0; translate: -44vw 36vh; }
+}
+
+/* --- Parallax landscape layers --------------------------------
+   Seamless repeat-x art; width covers viewport + its travel. */
+.ark__layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+  image-rendering: pixelated;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.ark__layer--far {
+  width: calc(100% + 320px);
+  height: 30vh;
+  bottom: 20vh;
+  background-image: url('/ark/mountains-far.png');
+  transform: translate3d(calc(var(--p) * -280px), 0, 0);
+  opacity: 0.9;
+}
+
+.ark__layer--mountains {
+  width: calc(100% + 680px);
+  height: 38vh;
+  bottom: 17vh;
+  background-image: url('/ark/mountains.png');
+  transform: translate3d(calc(var(--p) * -620px), 0, 0);
+}
+
+.ark__layer--obelisk {
+  width: calc(100% + 1040px);
+  height: 100%;
+  transform: translate3d(calc(var(--p) * -980px), 0, 0);
+}
+.ark__spire {
+  position: absolute;
+  left: 62%;
+  bottom: 18vh;
+  width: 26px;
+  height: 34vh;
+  background: linear-gradient(180deg, rgba(53, 224, 208, 0.9), rgba(24, 60, 66, 0.9));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  opacity: 0.85;
+}
+.ark__beam {
+  position: absolute;
+  left: calc(62% + 9px);
+  bottom: calc(18vh + 30vh);
+  width: 8px;
+  height: 60vh;
+  background: linear-gradient(180deg, transparent, rgba(53, 224, 208, 0.55));
+  opacity: 0.7;
+}
+
+.ark__layer--trees {
+  width: calc(100% + 1460px);
+  height: 24vh;
+  bottom: 14vh;
+  background-image: url('/ark/trees.png');
+  transform: translate3d(calc(var(--p) * -1400px), 0, 0);
+}
+
+/* Solid band the dino runs on — raised so the action sits higher
+   in the frame and scales better on tall browsers */
+.ark__ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 16vh;
+  background: linear-gradient(180deg, #17101c 0%, #0d0812 100%);
+}
+
+/* Foreground pines pass IN FRONT of the dino */
+.ark__layer--fg {
+  width: calc(100% + 2660px);
+  height: 34vh;
+  bottom: 0;
+  background-image: url('/ark/trees-fg.png');
+  transform: translate3d(calc(var(--p) * -2600px), 0, 0);
+  z-index: 5;
+}
+
+/* --- Supply drops (ride landmarks) ----------------------------- */
+/* Same travel speed as GROUND_TRAVEL in Experience.jsx. */
+.ark__drops {
+  width: calc(100% + 2460px);
+  height: 100%;
+  transform: translate3d(calc(var(--p) * -2400px), 0, 0);
+  z-index: 3;
+}
+
+.drop {
+  position: absolute;
+  bottom: 15vh;
+  width: 0;
+}
+
+.drop__beam {
+  position: absolute;
+  bottom: 10px;
+  left: -6px;
+  width: 12px;
+  height: 74vh;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--drop-color) 22%, transparent) 35%,
+    color-mix(in srgb, var(--drop-color) 55%, transparent) 100%
+  );
+  opacity: 0.5;
+  transition: opacity 0.5s var(--ease-out), width 0.5s var(--ease-out),
+    left 0.5s var(--ease-out);
+  animation: beam-flicker 3.2s ease-in-out infinite;
+}
+
+/* Supply pod — ARK-style faceted bipyramid (SVG, ArkProps.jsx);
+   the waist ring band picks up var(--drop-color) directly.
+   Sized in vh so it scales with the scene. */
+.drop__pod {
+  position: absolute;
+  bottom: 4px;
+  left: -3vh;
+  width: 6vh;
+  height: 10.4vh;
+  filter: drop-shadow(0 0 8px var(--drop-color));
+  transition: filter 0.5s var(--ease-out);
+  animation: pod-hover 3.6s ease-in-out infinite;
+}
+.drop__pod svg { display: block; width: 100%; height: 100%; }
+
+.drop__label {
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: color-mix(in srgb, var(--drop-color) 75%, #fff);
+  white-space: nowrap;
+  opacity: 0.75;
+}
+
+.drop.is-active .drop__beam { opacity: 1; width: 20px; left: -10px; }
+.drop.is-active .drop__pod {
+  filter: drop-shadow(0 0 16px var(--drop-color)) brightness(1.25);
+}
+.drop.is-active .drop__label { opacity: 1; }
+
+@keyframes beam-flicker {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.35); }
+}
+@keyframes pod-hover {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -6px; }
+}
+
+/* --- Tek Teleporter (journey's end) ------------------------------
+   Original tek-style build: hex platform + angular pylons + light
+   column. Dormant until the scene gets .is-arrived (p > 0.92),
+   then it powers up. Positioned at the full GROUND_TRAVEL so it's
+   always the FINAL landmark regardless of LOG length. */
+/* The teleporter is a real <button> (opens the Tek Portal). Sized
+   in vh so it scales with the scene; centered on its world-x. */
+.tek {
+  position: absolute;
+  bottom: 15vh;
+  width: 24vh;
+  height: 32vh;
+  margin-left: -12vh;
+  pointer-events: auto; /* parent layer is pointer-events: none */
+}
+
+/* ARK-style flat hex teleporter pad (SVG, ArkProps.jsx). Wide and
+   low, sitting on the ground; its teal trim (rings/edge/core/tips)
+   is dormant-dim and ignites on .is-arrived. */
+.tek__gate {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26vh;
+  height: 11.3vh; /* 240×104 viewBox ratio */
+  transition: filter 0.7s var(--ease-out);
+}
+.tek__gate svg { display: block; width: 100%; height: 100%; }
+
+/* The teleport light column — rises from the pad, hidden until
+   arrival */
+.tek__column {
+  position: absolute;
+  bottom: 8.5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15vh;
+  height: 58vh;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(53, 224, 208, 0.06) 30%,
+    rgba(53, 224, 208, 0.16) 70%,
+    rgba(53, 224, 208, 0.32) 100%);
+  clip-path: polygon(22% 0, 78% 0, 92% 100%, 8% 100%);
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+
+.tek__label {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: rgba(53, 224, 208, 0.7);
+  white-space: nowrap;
+  transition: color 0.5s var(--ease-out);
+}
+
+/* Powered up on arrival: teal trim ignites */
+.is-arrived .tek__column { opacity: 1; animation: tek-hum 2.4s ease-in-out infinite; }
+.is-arrived .tek__gate {
+  filter: drop-shadow(0 0 18px rgba(53, 224, 208, 0.6));
+}
+.is-arrived .tek__gate .tekpad__edge { opacity: 0.9; }
+.is-arrived .tek__gate .tekpad__ring { opacity: 0.85; }
+.is-arrived .tek__gate .tekpad__core { opacity: 0.8; }
+.is-arrived .tek__gate .tekpad__tip { opacity: 1; }
+.is-arrived .tek__gate .tekpad__underglow { opacity: 0.4; }
+.tekpad__edge, .tekpad__ring, .tekpad__core,
+.tekpad__tip, .tekpad__underglow {
+  transition: opacity 0.7s var(--ease-out);
+}
+.is-arrived .tek__label { color: var(--ark-holo); }
+
+/* Hover/focus nudges the teleporter even before arrival */
+.tek:hover .tek__gate,
+.tek:focus-visible .tek__gate {
+  filter: drop-shadow(0 0 12px rgba(53, 224, 208, 0.45));
+}
+.tek:hover .tek__gate .tekpad__ring,
+.tek:focus-visible .tek__gate .tekpad__ring { opacity: 0.6; }
+
+@keyframes tek-hum {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.45); }
+}
+
+/* --- The mount: Utahraptor run cycle (58-frame strip) ----------
+   Native frames are 150×50; displayed at 2.6× (390×130) with
+   image-rendering: pixelated so the upscale reads as chunky
+   pixels that match the scene. Silhouetted flat black.
+
+   NO time-based animation here — the sprite frame is written
+   directly by the scroll handler (Experience.jsx update()) from
+   ground distance traveled, so the gait is always locked to the
+   ground. background-position-x = -(frame × 390px). */
+.ark__dino {
+  position: absolute;
+  left: clamp(12px, 8vw, 160px);
+  bottom: 14.5vh; /* feet just onto the raised ground band */
+  /* viewport-relative so it scales with the browser */
+  width: clamp(420px, 38vw, 680px);
+  aspect-ratio: 3 / 1; /* native frame 150×50 */
+  z-index: 4;
+  filter: brightness(0) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4));
+  background-image: url('/ark/raptor-run.png');
+  /* 58 frames × 100% element width — one frame == one clientWidth,
+     so update() can offset by integer multiples of clientWidth */
+  background-size: 5800% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Survivor rider — crouched-survivor sprite (ansimuz, CC0) whose
+   lean reads as a riding posture. Sized as a % of the dino so it
+   scales with it; translateY bob is written by update() from the
+   SAME frame index as the gait, so mount and rider never drift.
+   Inherits the parent's brightness(0) → seamless silhouette. */
+.ark__rider {
+  position: absolute;
+  left: 48%;
+  top: -14%;
+  width: 13%;
+  aspect-ratio: 1 / 1;
+  will-change: transform;
+}
+.ark__rider img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* --- Survivor HUD --------------------------------------------- */
+.ark__hud {
+  position: absolute;
+  top: 92px;
+  left: clamp(16px, 5vw, 64px);
+  right: clamp(16px, 5vw, 64px);
+  z-index: 6;
+}
+.ark__hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.ark__back {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 236, 210, 0.75);
+  text-shadow: 0 1px 10px rgba(20, 10, 30, 0.8);
+  transition: color 0.25s var(--ease-out);
+}
+.ark__back:hover { color: var(--ark-holo); }
+
+.ark__readout { display: flex; gap: 10px; }
+.ark__chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  padding: 5px 10px;
+  color: #ffecd2;
+  border: 1px solid rgba(255, 236, 210, 0.35);
+  background: rgba(20, 12, 32, 0.5);
+  backdrop-filter: blur(4px);
+}
+.ark__chip b { color: var(--ark-amber); font-weight: 500; }
+.ark__chip--lvl { color: var(--ark-xp); border-color: rgba(159, 224, 138, 0.4); }
+
+.ark__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff3e0;
+  text-shadow: 0 2px 24px rgba(20, 10, 30, 0.9);
+  margin: 0;
+}
+.ark__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: var(--ark-holo);
+  margin: 6px 0 16px;
+  text-shadow: 0 1px 10px rgba(20, 10, 30, 0.8);
+}
+
+/* XP bar */
+.ark__xp {
+  position: relative;
+  max-width: 520px;
+  height: 8px;
+  border: 1px solid rgba(53, 224, 208, 0.45);
+  background: rgba(10, 8, 20, 0.55);
+}
+.ark__xp-fill {
+  height: 100%;
+  width: calc(var(--p) * 100%);
+  background: linear-gradient(90deg, var(--ark-ember), var(--ark-xp));
+}
+.ark__xp-tick {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: rgba(255, 236, 210, 0.5);
+}
+
+/* --- Tribe-log card -------------------------------------------- */
+.log-card {
+  background: rgba(12, 10, 20, 0.82);
+  border: 1px solid rgba(53, 224, 208, 0.3);
+  border-left: 3px solid var(--ark-holo);
+  backdrop-filter: blur(6px);
+  padding: 20px 22px;
+  max-width: 440px;
+}
+.log-card--ride {
+  position: absolute;
+  right: clamp(16px, 5vw, 64px);
+  top: 34vh;
+  z-index: 6;
+  animation: log-in 0.45s var(--ease-out);
+}
+@keyframes log-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.log-card__day {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ark-log);
+}
+.log-card__tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.26em;
+  color: var(--ark-holo);
+  margin: 6px 0 12px;
+}
+.log-card__role {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff3e0;
+  margin: 0 0 4px;
+}
+.log-card__org {
+  font-size: 13px;
+  color: var(--ark-amber);
+  margin-bottom: 10px;
+}
+.log-card__desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #c9c3d4;
+  margin: 0;
+}
+.log-card__gains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 14px 0 0;
+}
+.log-card__gains li {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ark-xp);
+  border: 1px solid rgba(159, 224, 138, 0.35);
+  padding: 3px 8px;
+}
+
+/* Scroll hint — fades out as the ride starts */
+.ark__hint {
+  position: absolute;
+  bottom: 3vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  color: rgba(255, 236, 210, 0.8);
+  opacity: clamp(0, calc(1 - var(--p) * 22), 1);
+  animation: hint-pulse 2s ease-in-out infinite;
+}
+@keyframes hint-pulse { 50% { opacity: 0.35; } }
+
+/* --- Reduced-motion static log --------------------------------- */
+.ark--static {
+  min-height: 100vh;
+  padding: 120px 0 100px;
+}
+.ark--static .ark__head { margin-bottom: 40px; }
+.ark--static .ark__title { color: var(--text); text-shadow: none; }
+.ark--static .log-card { margin-bottom: 20px; max-width: 640px; }
+.ark--static .ark__back { color: var(--text-dim); }
+
+/* --- Small screens ---------------------------------------------- */
+@media (max-width: 700px) {
+  .ark__hud { top: 120px; }
+  .log-card--ride {
+    top: auto;
+    bottom: 22vh;
+    right: 4vw;
+    left: 4vw;
+    max-width: none;
+    padding: 14px 16px;
+  }
+  .log-card__role { font-size: 1.25rem; }
+  .ark__dino {
+    left: 2vw;
+    width: 74vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ark__hint, .ark__meteors span, .ark__dino,
+  .drop__beam, .drop__pod,
+  .tek__column, .tek__pad-core {
+    animation: none;
+  }
+  .ark__meteors { display: none; }
+}
