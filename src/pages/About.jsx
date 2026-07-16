@@ -1,58 +1,99 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Archmother, HiddenKing } from '../components/Patrons'
+import { ArchmotherScene, HiddenKingScene } from '../components/PatronScenes'
+import SoulPlayground from '../components/SoulPlayground'
 import './about-patrons.css'
 
 /* ============================================================
-   About — "THE GREAT GAME" (Deadlock Old Gods, New Blood-
-   inspired; original art & design, no Valve assets).
+   About — "THE GREAT GAME" v3: the key-art split.
 
-   Design system (user constraints):
-   · UNIFIED palette — one deep gritty set (--dl-*) shared by
-     BOTH patrons: ink-olive, coal, olive, bone, burnt amber.
-   · CHECKERBOARD motif — dividers, the wedge border, card
-     hover reveals, the pedestal course, HUD strip.
-   · TRIANGLE layout — the Hidden King rises from a checker-
-     edged triangular panel anchored bottom-right; the
-     Archmother stands monumental top-left. The page reads
-     along the diagonal between them.
-   · Game-UI interactables — patron eyes/halo track the cursor
-     (--gx/--gy via rAF), a SOULS counter that pays out as you
-     explore, and a letterboxed patron dialogue bar.
+   The page IS the poster: the Archmother's poster-blue field on
+   the left, the Hidden King's poster-yellow field on the right,
+   divided by a hard DIAGONAL cut whose position (--split)
+   chases the cursor with inertia. At rest it's 50/50 — pure
+   key art. Push into a side to reveal that patron's dossier
+   (the same four facts, voiced by each patron).
 
-   Reduced motion / coarse pointers: gaze + dialogue interval
-   are skipped; layout is fully responsive (the wedge becomes a
-   flowing section on small screens via CSS).
+   · Colored checkers: white/blue strips on her side,
+     black/orange on his (per the user's note).
+   · Poster logotypes: Cinzel for ARCHMOTHER, Rock Salt scrawl
+     for Hidden King.
+   · SOULS counter + patron dialogue bar carried over from v2.
+   · SoulPlayground: the cracked soul orb is a physics toy
+     (bat / grab / throw) and CALICO the sphynx chases it —
+     and flees your cursor. Scoring feeds the Souls counter.
+
+   Default layout is STACKED (mobile / reduced-motion / coarse
+   pointer); the live split + playground mount only on fine
+   pointers with motion allowed. The King layer is aria-hidden
+   (mirrored, re-voiced content) so screen readers hear one page.
    ============================================================ */
 
 const EMAIL = 'saysschool4321@gmail.com'
 
-/* The dossier: formal doctrine, each with the King's scrawled
-   annotation beneath — two voices, one palette. */
+/* ---- exact-image mode --------------------------------------
+   Drop the reference images into /public/oldgods/ (see the
+   README there) and the page uses them automatically:
+   the two model shots become the realm BACKGROUNDS, the soul
+   screenshot skins the orb, and a Calico cutout replaces the
+   vector cat. Missing files fall back to the original art —
+   keep the image build private (Valve IP). */
+function useAsset(url) {
+  const [ok, setOk] = useState(false)
+  useEffect(() => {
+    const img = new Image()
+    img.onload = () => setOk(true)
+    img.src = url
+  }, [url])
+  return ok
+}
+
+const IMG = {
+  mother: '/oldgods/archmother.jpg',
+  king: '/oldgods/hiddenking.jpg',
+  soul: '/oldgods/soul.png',
+  calico: '/oldgods/calico.png',
+}
+
+/* Same four facts, two voices. */
 const FACTS = [
   {
     id: 'craft',
-    k: 'The Craft',
-    v: 'Begin from the citizen’s need. Raise a sharp first structure, then refine it under real light. Details are load-bearing.',
-    note: 'ship the rough cut. keep what survives.',
+    mother: {
+      k: 'The Craft',
+      v: 'Begin from the citizen’s need. Raise a sharp first structure, then refine it under real light. Details are load-bearing.',
+    },
+    king: {
+      k: 'the grind',
+      v: 'start with somebody’s actual problem. ship the rough cut, fix it in the street. keep what survives.',
+    },
   },
   {
     id: 'instruments',
-    k: 'Instruments',
-    v: 'React and TypeScript at the facade. Python in the engine rooms below. Whatever steel the structure demands.',
-    note: 'whatever gets the job done clean.',
+    mother: {
+      k: 'Instruments',
+      v: 'React and TypeScript at the facade. Python in the engine rooms below. Whatever steel the structure demands.',
+    },
+    king: {
+      k: 'tools of the trade',
+      v: 'react + typescript out front. python running the back rooms. whatever gets the job done clean.',
+    },
   },
   {
     id: 'works',
-    k: 'Civic Works',
-    v: 'Accessible tools as public infrastructure — an ASL-to-speech instrument; NextPlay, a disciplined kanban.',
-    note: 'tools for people the city forgot.',
+    mother: {
+      k: 'Civic Works',
+      v: 'Accessible tools as public infrastructure — an ASL-to-speech instrument; NextPlay, a disciplined kanban.',
+    },
+    king: {
+      k: 'after hours',
+      v: 'side jobs that talk: a rig that turns sign into speech. a kanban with good manners. tools for the forgotten.',
+    },
   },
   {
     id: 'contact',
-    k: 'Correspondence',
-    v: null, // rendered as the mail link
-    note: 'leave word. i hear everything in the cracks.',
+    mother: { k: 'Correspondence', v: null },
+    king: { k: 'leave word', v: null },
   },
 ]
 
@@ -65,135 +106,180 @@ const DIALOGUE = [
   { who: 'THE HIDDEN KING', line: 'he builds in the cracks too. those are mine.' },
 ]
 
+/* Diagonal cut, matching the poster's slant: the King's layer is
+   clipped left of a line running from (split+10vw, top) down to
+   (split−10vw, bottom). */
+const KING_CLIP =
+  'polygon(calc(var(--split) + 10vw) 0, 100% 0, 100% 100%, calc(var(--split) - 10vw) 100%)'
+
+function Plaques({ voice }) {
+  return (
+    <div className="og__plaques">
+      {FACTS.map((f) => {
+        const t = f[voice]
+        return (
+          <article className="og-plaque" key={f.id}>
+            <div className="checker-mini" aria-hidden="true" />
+            <h3 className="og-plaque__k">{t.k}</h3>
+            {f.id === 'contact' ? (
+              <p className="og-plaque__v">
+                <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
+              </p>
+            ) : (
+              <p className="og-plaque__v">{t.v}</p>
+            )}
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function About() {
   const rootRef = useRef(null)
+  const [pin, setPin] = useState(null)
   const [souls, setSouls] = useState(1130)
   const [line, setLine] = useState(0)
-  const earned = useRef(new Set())
+  const [live, setLive] = useState(false)
 
-  /* Patron gaze — eased cursor vector on --gx/--gy (−1…1) */
+  /* exact-image assets (auto-detected; see /public/oldgods/) */
+  const motherImg = useAsset(IMG.mother)
+  const kingImg = useAsset(IMG.king)
+  const soulImg = useAsset(IMG.soul)
+  const calicoImg = useAsset(IMG.calico)
+
+  const addSouls = useCallback((n) => setSouls((s) => s + n), [])
+
+  /* the seam — eased toward the cursor, overridden by pledges */
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
     const fine = window.matchMedia('(pointer: fine)').matches
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!fine || reduce) return
+    const wide = window.matchMedia('(min-width: 901px)').matches
+    if (!fine || reduce || !wide) return
 
-    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0
+    setLive(true)
+    root.classList.add('og--live')
+
+    let tx = 0.5
+    let cur = 0.5
+    let raf = 0
+
     const onMove = (e) => {
-      tx = (e.clientX / window.innerWidth - 0.5) * 2
-      ty = (e.clientY / window.innerHeight - 0.5) * 2
+      tx = Math.min(0.92, Math.max(0.08, e.clientX / window.innerWidth))
     }
     const frame = () => {
-      cx += (tx - cx) * 0.06
-      cy += (ty - cy) * 0.06
-      root.style.setProperty('--gx', cx.toFixed(3))
-      root.style.setProperty('--gy', cy.toFixed(3))
+      const pinNow = root.dataset.pin
+      const target = pinNow === 'mother' ? 0.9 : pinNow === 'king' ? 0.1 : tx
+      cur += (target - cur) * 0.075
+      root.style.setProperty('--split', `${(cur * 100).toFixed(2)}%`)
       raf = requestAnimationFrame(frame)
     }
     raf = requestAnimationFrame(frame)
-    window.addEventListener('pointermove', onMove)
+    root.addEventListener('pointermove', onMove)
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener('pointermove', onMove)
+      root.removeEventListener('pointermove', onMove)
+      root.classList.remove('og--live')
     }
   }, [])
 
-  /* Patron dialogue rotation */
+  /* patron dialogue */
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const id = setInterval(() => setLine((l) => (l + 1) % DIALOGUE.length), 5200)
     return () => clearInterval(id)
   }, [])
 
-  /* Souls pay out once per discovery */
-  const earn = (id, amount) => {
-    if (earned.current.has(id)) return
-    earned.current.add(id)
-    setSouls((s) => s + amount)
-  }
+  const pledge = (side) => setPin((p) => (p === side ? null : side))
 
   return (
-    <main className="patrons" ref={rootRef}>
-      {/* --- Match HUD --- */}
-      <div className="patrons__hud">
-        <Link to="/" className="patrons__back">← Star map</Link>
-        <span className="patrons__hudtitle">The Great Game · About</span>
-        <span className="patrons__souls" title="Souls earned this visit">
-          <span className="patrons__soul-orb" aria-hidden="true" />
+    <main className="og" ref={rootRef} data-pin={pin ?? undefined}>
+      {/* --- match HUD --- */}
+      <div className="og__hud">
+        <Link to="/" className="og__back">← Star map</Link>
+        <span className="og__hudtitle">Steven Yodice-Smith · The Great Game</span>
+        <span className="og__souls" title="Souls earned this visit">
+          <span className="og__soul-orb" aria-hidden="true" />
           {souls.toLocaleString()}
         </span>
       </div>
-      <div className="checker-strip checker-strip--hud" aria-hidden="true" />
 
-      <section className="patrons__stage">
-        {/* The Archmother — monumental, top-left */}
-        <div
-          className="patrons__mother"
-          aria-hidden="true"
-          onMouseEnter={() => earn('mother', 60)}
+      <div className="og__stage">
+        {/* ------- THE ARCHMOTHER (base, poster blue) ------- */}
+        <section
+          className={`og-realm og-realm--mother${motherImg ? ' og-realm--img' : ''}`}
+          style={motherImg ? { backgroundImage: `url(${IMG.mother})` } : undefined}
         >
-          <Archmother />
-          <p className="patrons__figure-label">The Archmother</p>
-        </div>
-
-        <header className="patrons__head">
-          <p className="patrons__eyebrow">Old Gods · New Blood</p>
-          <h1 className="patrons__title">Steven<br />Yodice-Smith</h1>
-          <div className="checker-strip" aria-hidden="true" />
-          <p className="patrons__sub">
-            Two patrons watch the work. Neither is ever fully satisfied.
-            The work improves.
-          </p>
-        </header>
-
-        {/* The dossier */}
-        <div className="patrons__dossier">
-          {FACTS.map((f, i) => (
-            <article
-              className="dcard"
-              key={f.id}
-              onMouseEnter={() => earn(f.id, 40 + i * 10)}
-            >
-              <header className="dcard__head">
-                <span className="dcard__num">{String(i + 1).padStart(2, '0')}</span>
-                <h2 className="dcard__k">{f.k}</h2>
-              </header>
-              {f.id === 'contact' ? (
-                <p className="dcard__v">
-                  <a href={`mailto:${EMAIL}`}>{EMAIL}</a>
-                </p>
-              ) : (
-                <p className="dcard__v">{f.v}</p>
-              )}
-              <p className="dcard__note">« {f.note} »</p>
-            </article>
-          ))}
-        </div>
-
-        {/* The Hidden King — the triangle, bottom-right */}
-        <div
-          className="patrons__wedge"
-          aria-hidden="true"
-          onMouseEnter={() => earn('king', 100)}
-        >
-          <div className="patrons__wedge-inner">
-            <div className="patrons__king"><HiddenKing /></div>
-            <p className="patrons__figure-label patrons__figure-label--king">
-              The Hidden King
+          {!motherImg && (
+            <div className="og-realm__scene" aria-hidden="true">
+              <ArchmotherScene />
+            </div>
+          )}
+          <div className="og-realm__content og-realm__content--mother">
+            <h1 className="og-logotype og-logotype--mother">Archmother</h1>
+            <div className="checker-strip checker-strip--mother" aria-hidden="true" />
+            <p className="og-realm__creed">
+              Glass, steel and stone. Order and power where once there was none.
             </p>
+            <Plaques voice="mother" />
           </div>
+        </section>
+
+        {/* ------- THE HIDDEN KING (top, poster yellow, diagonal clip) ------- */}
+        <section
+          className={`og-realm og-realm--king${kingImg ? ' og-realm--img' : ''}`}
+          style={
+            kingImg
+              ? { clipPath: KING_CLIP, backgroundImage: `url(${IMG.king})` }
+              : { clipPath: KING_CLIP }
+          }
+          aria-hidden="true"
+        >
+          {!kingImg && (
+            <div className="og-realm__scene" aria-hidden="true">
+              <HiddenKingScene />
+            </div>
+          )}
+          <div className="og-realm__content og-realm__content--king">
+            <h1 className="og-logotype og-logotype--king">Hidden King</h1>
+            <div className="checker-strip checker-strip--king" aria-hidden="true" />
+            <p className="og-realm__creed">
+              the stretching shadow of a skyscraper. he waits in the cracks.
+            </p>
+            <Plaques voice="king" />
+          </div>
+        </section>
+
+        {/* ------- shared chrome ------- */}
+        <div className="og__pledges" role="group" aria-label="Pledge to a patron">
+          <button
+            type="button"
+            className={`og-pledge og-pledge--mother${pin === 'mother' ? ' is-on' : ''}`}
+            aria-pressed={pin === 'mother'}
+            onClick={() => pledge('mother')}
+          >
+            ☩ Archmother
+          </button>
+          <button
+            type="button"
+            className={`og-pledge og-pledge--king${pin === 'king' ? ' is-on' : ''}`}
+            aria-pressed={pin === 'king'}
+            onClick={() => pledge('king')}
+          >
+            ⚿ hidden king
+          </button>
         </div>
 
-        {/* Patron dialogue bar */}
-        <div className="patrons__dialogue" aria-live="polite">
-          <span className="patrons__speaker">{DIALOGUE[line].who}</span>
-          <span className="patrons__line" key={line}>{DIALOGUE[line].line}</span>
+        <div className="og__dialogue" aria-live="polite">
+          <span className="og__speaker">{DIALOGUE[line].who}</span>
+          <span className="og__line" key={line}>{DIALOGUE[line].line}</span>
         </div>
-      </section>
+      </div>
 
-      {/* --- Credits (required attribution) --- */}
-      <footer className="patrons__credits">
+      {/* --- credits (required attribution) --- */}
+      <footer className="og__credits">
         <p>
           Planet textures ©{' '}
           <a href="https://www.solarsystemscope.com/textures/" target="_blank" rel="noreferrer noopener">
@@ -212,6 +298,15 @@ export default function About() {
           no Bungie, Wildcard, or Valve artwork is used.
         </p>
       </footer>
+
+      {/* --- the toys (fine pointer + motion only) --- */}
+      {live && (
+        <SoulPlayground
+          onScore={addSouls}
+          ballImg={soulImg ? IMG.soul : null}
+          catImg={calicoImg ? IMG.calico : null}
+        />
+      )}
     </main>
   )
 }

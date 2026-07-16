@@ -1,406 +1,568 @@
 /* ============================================================
-   About — "THE GREAT GAME" (Deadlock-inspired, original).
+   About — "THE GREAT GAME" v3 · the key-art split.
+   Poster-blue Archmother field vs poster-yellow Hidden King
+   field, hard diagonal cut chasing the cursor. Colored checkers
+   per realm (white/blue vs black/orange). Plus the soul-orb +
+   Calico playground layer.
 
-   ONE unified palette for everything — both patrons share it:
-   ink-olive ground, coal panels, olive lines, bone linework,
-   burnt amber as the single shared accent. The checkerboard is
-   the connective motif; the Hidden King's triangle anchors the
-   bottom-right corner.
+   Default layout = STACKED. `.og--live` (fine pointer + motion
+   + wide) turns the stage into the pinned split theater.
    ============================================================ */
 
-.patrons {
-  /* --- The unified palette (--dl-*) --- */
-  --dl-ink: #14140f;
-  --dl-coal: #201f18;
-  --dl-olive: #3a3a2c;
-  --dl-bone: #e6dfc8;
-  --dl-dim: #a89f84;
-  --dl-amber: #c98a3b;
+.og {
+  /* poster palette */
+  --og-blue: #1a7fd0;
+  --og-blue-deep: #0e5a9e;
+  --og-blue-ink: #082a4a;
+  --og-white: #f2f8fd;
+  --og-yellow: #f0a91b;
+  --og-yellow-deep: #d98e0e;
+  --og-black: #141008;
+  --og-orange: #f08c1c;
+  --og-amber: #ffb62e;
+  --og-bone: #e8d9b0;
 
-  --f-deco: 'Limelight', 'Rajdhani', serif;
+  --f-mother: 'Cinzel', Georgia, serif;
+  --f-king: 'Rock Salt', cursive;
   --f-type: 'Special Elite', 'Courier New', monospace;
 
-  /* patron gaze vector, written by rAF */
-  --gx: 0;
-  --gy: 0;
-
+  --split: 50%;
   width: 100%;
-  min-height: 100vh;
-  background:
-    radial-gradient(120% 90% at 80% 100%, rgba(32, 31, 24, 0.9), transparent 60%),
-    var(--dl-ink);
-  color: var(--dl-bone);
-}
-
-/* film grain over the whole page */
-.patrons::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  mix-blend-mode: overlay;
-  opacity: 0.05;
+  background: var(--og-black);
 }
 
 /* ------------------------------------------------------------
-   The checker motif
+   Match HUD (neutral dark band bridging both realms)
    ------------------------------------------------------------ */
-.checker-strip {
-  height: 12px;
-  width: 240px;
-  margin: 22px 0 18px;
-  background: repeating-conic-gradient(var(--dl-bone) 0% 25%, transparent 0% 50%);
-  background-size: 12px 12px;
-  opacity: 0.85;
-}
-.checker-strip--hud {
-  width: 100%;
-  height: 8px;
-  margin: 0;
-  background-size: 8px 8px;
-  opacity: 0.28;
-}
-
-/* ------------------------------------------------------------
-   Match HUD
-   ------------------------------------------------------------ */
-.patrons__hud {
+.og__hud {
+  position: relative;
+  z-index: 8;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding: 14px clamp(20px, 5vw, 64px);
-  border-bottom: 1px solid var(--dl-olive);
+  padding: 12px clamp(20px, 5vw, 64px);
+  background: var(--og-black);
+  border-bottom: 1px solid #2c2416;
 }
-.patrons__back {
+.og__back {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--dl-dim);
+  color: #9a8c6a;
   transition: color 0.25s var(--ease-out);
 }
-.patrons__back:hover { color: var(--dl-amber); }
-
-.patrons__hudtitle {
-  font-family: var(--f-deco);
+.og__back:hover { color: var(--og-amber); }
+.og__hudtitle {
+  font-family: var(--f-mother);
   font-size: 12px;
-  letter-spacing: 0.34em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--dl-dim);
+  color: #9a8c6a;
 }
-
-.patrons__souls {
+.og__souls {
   display: inline-flex;
   align-items: center;
   gap: 9px;
   font-family: var(--font-mono);
   font-size: 13px;
-  letter-spacing: 0.08em;
-  color: var(--dl-amber);
-  border: 1px solid var(--dl-olive);
-  background: var(--dl-coal);
+  color: var(--og-amber);
+  border: 1px solid #3a2f1a;
+  background: #1c160c;
   padding: 6px 12px;
 }
-.patrons__soul-orb {
-  width: 9px;
-  height: 9px;
+.og__soul-orb {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #f2c987, var(--dl-amber) 60%, #7a5222);
-  box-shadow: 0 0 10px 1px rgba(201, 138, 59, 0.7);
+  background: radial-gradient(circle at 35% 30%, #8fe8b4, #2fae72 55%, #0d6b45);
+  box-shadow: 0 0 0 2px rgba(255, 217, 74, 0.8), 0 0 10px 2px rgba(80, 220, 150, 0.6);
   animation: soul-bob 2.6s ease-in-out infinite;
 }
-@keyframes soul-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
+@keyframes soul-bob { 50% { transform: translateY(-3px); } }
+
+/* ------------------------------------------------------------
+   The stage + realms
+   ------------------------------------------------------------ */
+.og__stage { position: relative; }
+
+.og--live .og__stage {
+  height: calc(100dvh - 128px);
+  min-height: 640px;
+  overflow: hidden;
+}
+.og--live .og-realm {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.og--live .og-realm--king { z-index: 2; }
+
+/* stacked default */
+.og:not(.og--live) .og-realm--king { clip-path: none !important; }
+.og:not(.og--live) .og-realm { min-height: 60vh; }
+.og:not(.og--live) .og__pledges { display: none; }
+
+.og-realm { isolation: isolate; }
+
+/* --- fields --- */
+.og-realm--mother {
+  background:
+    radial-gradient(70% 50% at 30% 0%, rgba(255, 255, 255, 0.16), transparent 60%),
+    linear-gradient(168deg, #2b95e6 0%, var(--og-blue) 52%, var(--og-blue-deep) 100%);
+  color: var(--og-white);
+}
+.og-realm--king {
+  background:
+    radial-gradient(70% 50% at 70% 100%, rgba(120, 60, 0, 0.25), transparent 60%),
+    linear-gradient(200deg, #f7b41f 0%, var(--og-yellow) 55%, var(--og-yellow-deep) 100%);
+  color: var(--og-black);
+}
+
+/* --- the figures --- */
+.og-realm__figure {
+  position: absolute;
+  bottom: 0;
+  height: min(84%, 660px);
+  aspect-ratio: 400 / 580;
+  pointer-events: none;
+}
+.og-realm__figure svg { width: 100%; height: 100%; display: block; }
+.og-realm__figure--mother {
+  left: clamp(8px, 4vw, 90px);
+  filter: drop-shadow(0 0 34px rgba(190, 228, 255, 0.55));
+}
+.og-realm__figure--king {
+  right: clamp(8px, 4vw, 90px);
+  filter: drop-shadow(0 10px 26px rgba(60, 38, 0, 0.45));
+}
+
+/* --- full illustrated scene layer (deployable, original art) --- */
+.og-realm__scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.og-realm__scene svg { width: 100%; height: 100%; display: block; }
+/* stacked: the scene becomes a banner above the content */
+.og:not(.og--live) .og-realm__scene {
+  position: relative;
+  height: 48vh;
+  min-height: 300px;
+}
+
+/* --- scene animations (original vector scenes) --- */
+.ams-ray { animation: ams-ray 7s ease-in-out infinite alternate; transform-origin: 50% 0; }
+@keyframes ams-ray { from { opacity: 0.06; } to { opacity: 0.16; } }
+.ams-beam { animation: ams-beam 5s ease-in-out infinite; }
+@keyframes ams-beam { 50% { opacity: 0.82; } }
+
+.hks-eye {
+  filter: drop-shadow(0 0 6px rgba(150, 255, 90, 0.95));
+  animation: hks-blink 5.4s steps(1) infinite;
+}
+@keyframes hks-blink { 0%,44%,50%,100% { opacity: 1; } 46%,48% { opacity: 0.12; } }
+.hks-hands, .hks-handglow { animation: hks-hands 3.6s ease-in-out infinite; }
+@keyframes hks-hands { 50% { opacity: 0.82; } }
+.hks-fire { animation: hks-fire 1.6s ease-in-out infinite; transform-origin: 50% 100%; }
+@keyframes hks-fire {
+  0%, 100% { opacity: 0.7; transform: scaleY(0.96) scaleX(1.02); }
+  50% { opacity: 1; transform: scaleY(1.05) scaleX(0.97); }
+}
+.hks-bolt { animation: hks-bolt 6s steps(1) infinite; }
+@keyframes hks-bolt { 0%,92%,100% { opacity: 0; } 93%,95%,97% { opacity: 1; } 94%,96% { opacity: 0.2; } }
+.hks-bolt2 { animation: hks-bolt2 6s steps(1) infinite; }
+@keyframes hks-bolt2 { 0%,90%,100% { opacity: 0; } 91%,96% { opacity: 0.75; } }
+
+/* patron glows */
+.hk-eye {
+  filter: drop-shadow(0 0 4px rgba(255, 217, 74, 0.95));
+  animation: hk-blink 5.4s steps(1) infinite;
+}
+@keyframes hk-blink {
+  0%, 100% { opacity: 1; }
+  46% { opacity: 1; }
+  48% { opacity: 0.1; }
+  50% { opacity: 1; }
+}
+.hk-hands { filter: drop-shadow(0 0 14px rgba(247, 167, 51, 0.85)); }
+.am-beam { animation: am-breathe 5s ease-in-out infinite; }
+@keyframes am-breathe { 50% { opacity: 0.72; } }
+
+/* --- content zones (each on its patron's visible half) --- */
+.og-realm__content {
+  position: absolute;
+  top: clamp(24px, 5vh, 56px);
+  width: min(44vw, 600px);
+  z-index: 3;
+}
+.og-realm__content {
+  padding: 20px 22px;
+}
+.og-realm__content--mother {
+  right: clamp(16px, 4vw, 70px);
+  background: rgba(10, 34, 58, 0.62);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(242, 248, 253, 0.28);
+}
+.og-realm__content--king {
+  left: clamp(16px, 4vw, 70px);
+  background: rgba(14, 9, 4, 0.66);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(240, 140, 28, 0.32);
+}
+
+/* stacked: content flows normally */
+.og:not(.og--live) .og-realm__content {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  width: auto;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 46px clamp(20px, 5vw, 64px) 40px;
+}
+.og:not(.og--live) .og-realm__figure {
+  position: relative;
+  height: 42vh;
+  margin: 20px auto 0;
+  display: block;
+}
+
+/* --- logotypes (the poster type) --- */
+.og-logotype { margin: 0 0 10px; line-height: 1; }
+.og-logotype--mother {
+  font-family: var(--f-mother);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 4.4vw, 3.8rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--og-white);
+  text-shadow: 0 2px 18px rgba(8, 42, 74, 0.5);
+}
+.og-logotype--king {
+  font-family: var(--f-king);
+  font-size: clamp(1.7rem, 3.4vw, 2.9rem);
+  color: var(--og-black);
+  transform: rotate(-2deg);
+}
+
+.og-realm__creed {
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 14px 0 26px;
+}
+.og-realm--mother .og-realm__creed { font-family: Georgia, serif; font-style: italic; color: #d6e9fa; }
+.og-realm--king .og-realm__creed { font-family: var(--f-type); color: #4a3406; }
+
+/* ------------------------------------------------------------
+   COLORED CHECKERS — each realm's duo
+   ------------------------------------------------------------ */
+.checker-strip {
+  height: 14px;
+  width: 250px;
+  background-size: 14px 14px;
+}
+.checker-strip--mother {
+  background-image: repeating-conic-gradient(var(--og-white) 0% 25%, var(--og-blue-deep) 0% 50%);
+}
+.checker-strip--king {
+  background-image: repeating-conic-gradient(var(--og-black) 0% 25%, var(--og-orange) 0% 50%);
+}
+
+.checker-mini {
+  height: 8px;
+  width: 96px;
+  margin-bottom: 10px;
+  background-size: 8px 8px;
+}
+.og-realm--mother .checker-mini {
+  background-image: repeating-conic-gradient(var(--og-white) 0% 25%, var(--og-blue-deep) 0% 50%);
+}
+.og-realm--king .checker-mini {
+  background-image: repeating-conic-gradient(var(--og-black) 0% 25%, var(--og-orange) 0% 50%);
 }
 
 /* ------------------------------------------------------------
-   Stage — the diagonal composition
+   Plaques
    ------------------------------------------------------------ */
-.patrons__stage {
-  position: relative;
-  max-width: 1420px;
-  margin: 0 auto;
-  padding: 60px clamp(20px, 5vw, 64px) 56vh;
-  overflow: hidden;
-}
-
-/* --- The Archmother, monumental top-left --- */
-.patrons__mother {
-  position: absolute;
-  top: 34px;
-  left: clamp(-30px, 1vw, 40px);
-  width: clamp(200px, 24vw, 330px);
-  z-index: 1;
-  opacity: 0.95;
-}
-.patrons__mother svg { width: 100%; height: auto; display: block; }
-
-.patrons__figure-label {
-  font-family: var(--f-deco);
-  font-size: 11px;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--dl-dim);
-  text-align: center;
-  margin: 12px 0 0;
-}
-
-/* patron gaze + amber pulse */
-.patron__gaze {
-  transform: translate(calc(var(--gx) * 5px), calc(var(--gy) * 4px));
-}
-.patron__gaze--eyes {
-  transform: translate(calc(var(--gx) * 8px), calc(var(--gy) * 6px));
-}
-.patron__light {
-  filter: drop-shadow(0 0 6px rgba(201, 138, 59, 0.9));
-  animation: light-pulse 3.4s ease-in-out infinite;
-}
-@keyframes light-pulse {
-  0%, 100% { opacity: 0.75; }
-  50% { opacity: 1; }
-}
-
-/* --- Header, offset right of the Archmother --- */
-.patrons__head {
-  position: relative;
-  z-index: 2;
-  margin-left: clamp(210px, 26vw, 360px);
-  max-width: 640px;
-}
-.patrons__eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-  color: var(--dl-amber);
-  margin: 0 0 14px;
-}
-.patrons__title {
-  font-family: var(--f-deco);
-  font-size: clamp(2.4rem, 5.6vw, 4.4rem);
-  line-height: 1.05;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--dl-bone);
-  margin: 0;
-}
-.patrons__sub {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-style: italic;
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--dl-dim);
-  max-width: 46ch;
-  margin: 0;
-}
-
-/* --- Dossier cards, marching toward the triangle --- */
-.patrons__dossier {
-  position: relative;
-  z-index: 2;
-  margin: 64px 0 0 clamp(0px, 8vw, 120px);
-  max-width: 780px;
+.og__plaques {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
 }
-.dcard:nth-child(even) { transform: translateY(26px); }
+.og-plaque {
+  padding: 16px 18px 14px;
+  transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+}
+.og-plaque:hover { transform: translateY(-3px); }
 
-.dcard {
-  position: relative;
-  overflow: hidden;
-  background: var(--dl-coal);
-  border: 1px solid var(--dl-olive);
-  padding: 20px 22px 16px;
-  transition: border-color 0.3s var(--ease-out), transform 0.3s var(--ease-out),
-    box-shadow 0.3s var(--ease-out);
+.og-realm--mother .og-plaque {
+  background: rgba(8, 42, 74, 0.32);
+  border: 1px solid rgba(242, 248, 253, 0.5);
+  backdrop-filter: blur(2px);
 }
-/* checker reveal on hover */
-.dcard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-conic-gradient(rgba(230, 223, 200, 0.05) 0% 25%, transparent 0% 50%);
-  background-size: 14px 14px;
-  opacity: 0;
-  transition: opacity 0.35s var(--ease-out);
-  pointer-events: none;
-}
-.dcard:hover { border-color: var(--dl-amber); box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5); }
-.dcard:hover::after { opacity: 1; }
-.dcard:nth-child(even):hover { transform: translateY(22px); }
-.dcard:nth-child(odd):hover { transform: translateY(-4px); }
-
-.dcard__head {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  border-bottom: 1px solid var(--dl-olive);
-  padding-bottom: 10px;
-  margin-bottom: 12px;
-}
-.dcard__num {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--dl-amber);
-  letter-spacing: 0.2em;
-}
-.dcard__k {
-  font-family: var(--f-deco);
-  font-size: 15px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--dl-bone);
-  margin: 0;
-}
-.dcard__v {
-  font-family: Georgia, 'Times New Roman', serif;
+.og-realm--mother .og-plaque:hover { box-shadow: 0 10px 26px rgba(8, 42, 74, 0.4); }
+.og-realm--mother .og-plaque__k {
+  font-family: var(--f-mother);
   font-size: 14px;
-  line-height: 1.7;
-  color: #c9c2ad;
-  margin: 0 0 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--og-white);
+  margin: 0 0 8px;
 }
-.dcard__v a { color: var(--dl-amber); border-bottom: 1px solid var(--dl-olive); }
-.dcard__v a:hover { border-color: var(--dl-amber); }
-.dcard__note {
-  font-family: var(--f-type);
-  font-size: 12.5px;
-  color: var(--dl-amber);
-  opacity: 0.85;
+.og-realm--mother .og-plaque__v {
+  font-family: Georgia, serif;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #d6e9fa;
   margin: 0;
 }
+.og-realm--mother .og-plaque__v a { color: #fff; border-bottom: 1px solid rgba(242,248,253,.6); }
 
-/* --- The Hidden King's triangle, bottom-right --- */
-.patrons__wedge {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: min(54vw, 780px);
-  height: min(58vh, 600px);
-  z-index: 3;
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  /* the checkered border IS the outer triangle */
-  background: repeating-conic-gradient(rgba(230, 223, 200, 0.22) 0% 25%, transparent 0% 50%);
-  background-size: 18px 18px;
-  background-color: var(--dl-coal);
+.og-realm--king .og-plaque {
+  background: rgba(20, 16, 8, 0.88);
+  border: 1px solid var(--og-black);
+  transform: rotate(-0.6deg);
 }
-.patrons__wedge-inner {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: calc(100% - 30px);
-  height: calc(100% - 30px);
-  clip-path: polygon(100% 0, 100% 100%, 0 100%);
-  background: linear-gradient(200deg, var(--dl-coal) 0%, var(--dl-ink) 70%);
+.og-realm--king .og-plaque:nth-child(even) { transform: rotate(0.7deg); }
+.og-realm--king .og-plaque:hover { transform: rotate(0deg) translateY(-3px); box-shadow: 0 10px 24px rgba(60, 38, 0, 0.5); }
+.og-realm--king .og-plaque__k {
+  font-family: var(--f-king);
+  font-size: 13px;
+  color: var(--og-amber);
+  margin: 0 0 10px;
 }
-.patrons__king {
-  position: absolute;
-  right: 1vw;
-  bottom: -6px;
-  height: 88%;
-  aspect-ratio: 300 / 340;
+.og-realm--king .og-plaque__v {
+  font-family: var(--f-type);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--og-bone);
+  margin: 0;
 }
-.patrons__king svg { width: 100%; height: 100%; display: block; }
-.patrons__figure-label--king {
+.og-realm--king .og-plaque__v a { color: var(--og-amber); border-bottom: 1px dashed var(--og-orange); }
+
+/* ------------------------------------------------------------
+   Pledges + dialogue
+   ------------------------------------------------------------ */
+.og__pledges {
   position: absolute;
-  right: 46%;
-  bottom: 26px;
-  color: var(--dl-dim);
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  gap: 12px;
+}
+.og-pledge {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  padding: 10px 16px;
+  transition: all 0.3s var(--ease-out);
+}
+.og-pledge--mother {
+  font-family: var(--f-mother);
+  text-transform: uppercase;
+  color: var(--og-white);
+  background: var(--og-blue-ink);
+  border: 1px solid var(--og-white);
+}
+.og-pledge--mother:hover, .og-pledge--mother.is-on {
+  background: var(--og-white);
+  color: var(--og-blue-ink);
+  box-shadow: 0 0 22px -4px rgba(242, 248, 253, 0.9);
+}
+.og-pledge--king {
+  font-family: var(--f-king);
+  color: var(--og-amber);
+  background: var(--og-black);
+  border: 1px dashed var(--og-orange);
+}
+.og-pledge--king:hover, .og-pledge--king.is-on {
+  background: var(--og-orange);
+  color: var(--og-black);
+  border-style: solid;
+  box-shadow: 0 0 22px -4px rgba(240, 140, 28, 0.9);
 }
 
-/* --- Patron dialogue bar, bottom-left --- */
-.patrons__dialogue {
+.og__dialogue {
   position: absolute;
-  left: clamp(20px, 5vw, 64px);
-  bottom: 30px;
-  z-index: 4;
-  max-width: min(40vw, 520px);
-  border-left: 3px solid var(--dl-amber);
-  background: rgba(20, 20, 15, 0.85);
+  left: clamp(20px, 4vw, 64px);
+  bottom: 24px;
+  z-index: 6;
+  max-width: min(34vw, 440px);
+  border-left: 3px solid var(--og-amber);
+  background: rgba(12, 9, 4, 0.88);
   padding: 12px 16px;
 }
-.patrons__speaker {
+.og:not(.og--live) .og__dialogue {
+  position: relative;
+  left: auto;
+  bottom: auto;
+  margin: 0 auto;
+  max-width: 680px;
+}
+.og__speaker {
   display: block;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: var(--dl-amber);
+  color: var(--og-amber);
   margin-bottom: 6px;
 }
-.patrons__line {
+.og__line {
   display: block;
   font-family: var(--f-type);
   font-size: 14px;
   line-height: 1.55;
-  color: var(--dl-bone);
-  animation: line-reveal 1.1s steps(24);
+  color: var(--og-bone);
+  animation: og-line-reveal 1.1s steps(24);
 }
-@keyframes line-reveal {
+@keyframes og-line-reveal {
   from { clip-path: inset(0 100% 0 0); }
   to { clip-path: inset(0 0 0 0); }
 }
 
 /* ------------------------------------------------------------
-   Credits footer (required attribution)
+   Credits
    ------------------------------------------------------------ */
-.patrons__credits {
-  border-top: 1px solid var(--dl-olive);
-  background: var(--dl-ink);
-  padding: 26px clamp(20px, 5vw, 64px) 40px;
+.og__credits {
+  position: relative;
+  z-index: 8;
+  background: var(--og-black);
+  border-top: 1px solid #2c2416;
+  padding: 24px clamp(20px, 5vw, 64px) 38px;
 }
-.patrons__credits p {
+.og__credits p {
   max-width: 900px;
   margin: 0 auto;
   font-size: 12px;
   line-height: 1.7;
-  color: #7d7663;
+  color: #8a7c5e;
 }
-.patrons__credits a { color: var(--dl-dim); border-bottom: 1px solid var(--dl-olive); }
-.patrons__credits a:hover { color: var(--dl-amber); }
+.og__credits a { color: #b3a276; border-bottom: 1px solid #3a2f1a; }
+.og__credits a:hover { color: var(--og-amber); }
 
 /* ------------------------------------------------------------
-   Small screens — the composition stacks, triangle keeps its cut
+   THE PLAYGROUND — soul orb + Calico
    ------------------------------------------------------------ */
-@media (max-width: 900px) {
-  .patrons__mother {
-    position: relative;
-    top: auto;
-    left: auto;
-    margin: 0 auto 30px;
-    width: min(46vw, 240px);
-  }
-  .patrons__head { margin-left: 0; }
-  .patrons__dossier {
-    margin-left: 0;
-    grid-template-columns: 1fr;
-  }
-  .dcard:nth-child(even) { transform: none; }
-  .dcard:nth-child(even):hover { transform: translateY(-4px); }
+.playground {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  overflow: hidden;
+}
+.playground__ball {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 52px;
+  height: 52px;
+  pointer-events: auto;
+  cursor: grab;
+  will-change: transform;
+  filter: drop-shadow(0 0 12px rgba(90, 230, 150, 0.75));
+}
+.playground__ball.is-held { cursor: grabbing; filter: drop-shadow(0 0 20px rgba(120, 250, 170, 0.95)); }
+.playground__ball svg { width: 100%; height: 100%; display: block; }
 
-  .patrons__stage { padding-bottom: 20px; overflow: visible; }
-  .patrons__wedge {
-    position: relative;
-    width: 100%;
-    height: 54vh;
-    margin-top: 48px;
-  }
-  .patrons__dialogue {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    max-width: none;
-    margin: 26px 0 10px;
-  }
+.playground__cat {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 118px;
+  height: 82px;
+  will-change: transform;
+  filter: drop-shadow(0 4px 6px rgba(20, 10, 30, 0.4));
+}
+.playground__cat svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+/* run cycle */
+.cat__legs-f, .cat__legs-b { transform-box: fill-box; transform-origin: 50% 8%; }
+.playground__cat.is-running .cat__legs-f { animation: cat-step 0.24s linear infinite; }
+.playground__cat.is-running .cat__legs-b { animation: cat-step 0.24s linear infinite reverse; }
+.playground__cat.is-fleeing .cat__legs-f { animation-duration: 0.15s; }
+.playground__cat.is-fleeing .cat__legs-b { animation-duration: 0.15s; }
+@keyframes cat-step {
+  0%, 100% { transform: rotate(18deg); }
+  50% { transform: rotate(-18deg); }
+}
+.cat__tail { transform-box: fill-box; transform-origin: 90% 90%; animation: tail-sway 2.6s ease-in-out infinite; }
+.playground__cat.is-fleeing .cat__tail { animation-duration: 0.5s; }
+@keyframes tail-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(14deg); }
 }
 
+/* ------------------------------------------------------------
+   EXACT-IMAGE MODE (/public/oldgods/* present — private builds)
+   ------------------------------------------------------------ */
+/* the model shots become the full-bleed realm backgrounds */
+.og-realm--img {
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+}
+/* readability scrims behind each side's content */
+.og-realm--img .og-realm__content {
+  padding: 20px 22px;
+  border-radius: 2px;
+}
+.og-realm--mother.og-realm--img .og-realm__content {
+  background: rgba(8, 30, 52, 0.6);
+  backdrop-filter: blur(3px);
+  border: 1px solid rgba(242, 248, 253, 0.3);
+}
+.og-realm--king.og-realm--img .og-realm__content {
+  background: rgba(16, 10, 4, 0.62);
+  backdrop-filter: blur(3px);
+  border: 1px solid rgba(240, 140, 28, 0.35);
+}
+.og-realm--king.og-realm--img .og-logotype--king { color: var(--og-amber); }
+.og-realm--king.og-realm--img .og-realm__creed { color: var(--og-bone); }
+
+/* orb image skin — circle-cropped so the screenshot corners vanish */
+.playground__ball--img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  clip-path: circle(48%);
+  pointer-events: none;
+}
+
+/* Calico image skin — expects a transparent cutout; the leg-cycle
+   can't animate a photo, so running becomes a gallop-rock */
+.playground__cat--img { width: 96px; height: 110px; }
+.playground__cat--img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  pointer-events: none;
+}
+.playground__cat--img.is-running img {
+  animation: cat-gallop-img 0.3s ease-in-out infinite;
+  transform-origin: 50% 92%;
+}
+.playground__cat--img.is-fleeing img { animation-duration: 0.18s; }
+@keyframes cat-gallop-img {
+  0%, 100% { transform: rotate(-4deg) translateY(0); }
+  50% { transform: rotate(4deg) translateY(-6px); }
+}
+
+/* ------------------------------------------------------------
+   Small screens + reduced motion
+   ------------------------------------------------------------ */
+@media (max-width: 900px) {
+  .og__hudtitle { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .patrons__soul-orb, .patron__light { animation: none; }
-  .patrons__line { animation: none; }
-  .patron__gaze, .patron__gaze--eyes { transform: none; }
+  .og__soul-orb, .hk-eye, .am-beam, .og__line,
+  .cat__tail, .cat__legs-f, .cat__legs-b { animation: none; }
 }

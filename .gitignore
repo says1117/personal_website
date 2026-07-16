@@ -6,3 +6,8 @@ dist-ssr
 .env.*
 .DS_Store
 .vercel
+
+# Private-use game images (Valve IP) — never commit/deploy these.
+# The page falls back to original vector art without them.
+public/oldgods/*
+!public/oldgods/README-oldgods.md
